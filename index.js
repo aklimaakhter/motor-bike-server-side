@@ -37,11 +37,14 @@ async function run(){
        $set: user,   
      };
      const result = await userCollection.updateOne(filter, updateDoc, options);
-     res.send(result);
+     const token = jwt.sign({ email: email }, process.env.ACCESS_TOKEN_SECRET,{ expiresIn: '1h'})
+     res.send({result, token});
    })
 
    app.get('/service', async(req, res) =>{
      const client = req.query.client;
+    //  const authorization = req.headers.authorization;
+     console.log('auth headers', authorization);
      const query = {client: client};
      const services = await serviceCollection .find(query).toArray(); 
      res.send(services);
