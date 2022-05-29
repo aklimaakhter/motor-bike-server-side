@@ -13,6 +13,21 @@ const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster
 
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
 
+function verifyJWT(req, res, next){
+  const authHeader = req.headers.authorization;
+  if(!authHeader){
+    return res.status(401).send({message: 'UnAuthorized access'});
+  }
+  const token = authHeader.split(' ')[1];
+  jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, function (err, decoded) {
+    if (err) {
+      return res.status(403).send({ message: 'Forbidden access' })
+    }
+    req.decoded = decoded;
+    next();
+  });
+}
+
 async function run(){
    try{
        await client.connect();
@@ -28,6 +43,11 @@ async function run(){
        res.send(parts);
    });
 
+   app.get('/user', async(req, res) =>{
+     const users = await userCollection.find().toArray();
+     res.send(users);
+   })
+
    app.put('/user/:email', async(req, res) =>{
        const email = req.params.email;
        const user = req.body;
@@ -41,13 +61,17 @@ async function run(){
      res.send({result, token});
    })
 
-   app.get('/service', async(req, res) =>{
+   app.get('/service', verifyJWT, async(req, res) =>{
      const client = req.query.client;
-    //  const authorization = req.headers.authorization;
-     console.log('auth headers', authorization);
-     const query = {client: client};
-     const services = await serviceCollection .find(query).toArray(); 
-     res.send(services);
+    const decodedEmail = req.decoded.email;
+     if(client=== decodedEmail){
+       const query = { client: client };
+       const services = await serviceCollection.find(query).toArray();
+      return res.send(services);
+     }
+     else{
+       return res.status(403).send({message: 'forbidden access'});
+     }
    })
 
    app.post('/service', async(req, res)=>{
