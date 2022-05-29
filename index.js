@@ -52,7 +52,7 @@ async function run(){
      const email = req.params.email;
      const user = await userCollection.findOne({email: email});
      const isAdmin = user.role === 'admin';
-     
+
    })
 
    app.put('/user/admin/:email', verifyJWT, async(req, res) =>{
@@ -122,6 +122,3 @@ app.get('/', (req, res) => {
     res.send('Hello World!')
 })
 
-app.listen(port, () => {
-    console.log(`Motor Bike app listening on port ${port}`)
-})
