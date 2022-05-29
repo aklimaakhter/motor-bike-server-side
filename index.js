@@ -18,6 +18,7 @@ async function run(){
      const partCollection = client.db('motor_bike_portal').collection('parts');
    
      const serviceCollection = client.db('motor_bike_portal').collection('service');
+     const userCollection = client.db('motor_bike_portal').collection('users');
    
      app.get('/part', async(req, res) =>{
        const query = {};
@@ -25,6 +26,25 @@ async function run(){
        const parts = await cursor.toArray();
        res.send(parts);
    });
+
+   app.put('/user/:email', async(req, res) =>{
+       const email = req.params.email;
+       const user = req.body;
+       const filter = {email: email};
+       const options = { upsert: true };
+     const updateDoc = {
+       $set: user,   
+     };
+     const result = await userCollection.updateOne(filter, updateDoc, options);
+     res.send(result);
+   })
+
+   app.get('/service', async(req, res) =>{
+     const client = req.query.client;
+     const query = {client: client};
+     const services = await serviceCollection .find(query).toArray(); 
+     res.send(services);
+   })
 
    app.post('/service', async(req, res)=>{
      const service = req.body;
