@@ -122,3 +122,6 @@ app.get('/', (req, res) => {
     res.send('Hello World!')
 })
 
+app.listen(port, () => {
+  console.log(`Motor Bike app listening on port ${port}`)
+})
