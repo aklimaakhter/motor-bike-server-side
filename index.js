@@ -107,7 +107,7 @@ async function run() {
       if (exists) {
         return res.send({ success: false, service: exists })
       }
-      const resul = await serviceCollection.insertOne(service);
+      const result = await serviceCollection.insertOne(service);
       return res.send({ success: true, result });
     })
 
